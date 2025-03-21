@@ -1,5 +1,5 @@
 import time
-from src.MaxSAT.solver import solve_maxsat, generate_dynamic_clauses
+from src.solver_Max_SAT import solve_maxsat, generate_dynamic_clauses
 from src.parser import process_directory, parse_kb_to_cnf
 
 directory_path = "data"
