@@ -7,17 +7,30 @@ def generate_dynamic_clauses(knowledgebase):
     atoms = set()
     formula_atoms = {}
 
-    for i, formula in enumerate(knowledgebase):  
+    formula_offset = 0 
+
+    print(knowledgebase)
+
+    for formula_idx, formula_clauses in enumerate(knowledgebase):
         atoms_in_formula = set()
-        for literal in formula:
-            atom = abs(literal)
+        if isinstance(formula_clauses[0], list): # Überprüfen, ob die Klausel eine Liste ist
+            for clause in formula_clauses:
+                for literal in clause:
+                    atom = abs(literal)
+                    atoms.add(atom)
+                    atoms_in_formula.add(atom)
+        else: # Sonderfall: Einzelnes Atom
+            atom = abs(formula_clauses[0])
             atoms.add(atom)
             atoms_in_formula.add(atom)
-        formula_atoms[i] = atoms_in_formula
+
+        formula_atoms[formula_idx] = atoms_in_formula
 
     # Variablen für A_true, A_false und A_both erstellen
     num_atoms = len(atoms)
     atom_mapping = {atom: (i + 1, i + num_atoms + 1, i + 2 * num_atoms + 1) for i, atom in enumerate(atoms)}
+
+    print(atom_mapping)
 
     # Hard Clauses für dreiwertige Logik erstellen
     for atom, (a_true, a_false, a_both) in atom_mapping.items():
@@ -38,22 +51,42 @@ def generate_dynamic_clauses(knowledgebase):
             hard_clauses.append([f_inconsistent_i, -a_both])  # F_inconsistent_i ∨ ¬A_both
 
     # Hard Clauses für jede Klausel innerhalb der CNF-Form
-    for clause in knowledgebase:
-        clause_literals = []
-        for literal in clause:
-            atom = abs(literal)
-            if literal > 0:
+    for formula_clauses in knowledgebase:
+        if isinstance(formula_clauses[0], list): # Überprüfen, ob formula_clauses[0] eine Liste ist.
+            for clause in formula_clauses:
+                clause_literals = []
+                for literal in clause:
+                    atom = abs(literal)
+                    if literal > 0:
+                        clause_literals.append(atom_mapping[atom][0])  # A_true wenn positiv
+                    else:
+                        clause_literals.append(atom_mapping[atom][1])  # A_false wenn negativ
+                    clause_literals.append(atom_mapping[atom][2])  # A_both immer hinzufügen
+                hard_clauses.append(clause_literals)  # Disjunktion aller Li und Lb
+        else: # Sonderfall: Einzelnes Literal
+            atom = abs(formula_clauses[0])
+            clause_literals = []
+            if formula_clauses[0] > 0:
                 clause_literals.append(atom_mapping[atom][0])  # A_true wenn positiv
             else:
                 clause_literals.append(atom_mapping[atom][1])  # A_false wenn negativ
             clause_literals.append(atom_mapping[atom][2])  # A_both immer hinzufügen
-        hard_clauses.append(clause_literals)  # Disjunktion aller Li und Lb
+            hard_clauses.append(clause_literals)
 
     # Soft Clauses für jede Formel hinzufügen
     for formula_idx in range(num_formulas):
         soft_clauses.append(([-f_inconsistent_vars[formula_idx]], 1))  # ¬F_inconsistent_i (Gewicht 1)
 
-    return hard_clauses, soft_clauses
+    return hard_clauses, soft_clauses, atom_mapping
+
+def get_both_atoms(model, atom_mapping):
+    both_atoms = []
+    reverse_atom_mapping = {v[2]: k for k, v in atom_mapping.items()}
+    for literal in model:
+        if literal > 0 and literal in reverse_atom_mapping:
+            atom = reverse_atom_mapping[literal]
+            both_atoms.append(atom)
+    return both_atoms
 
 def solve_maxsat(knowledgebase, solver_name="Glucose3", hard_clauses=None, soft_clauses=None):
 

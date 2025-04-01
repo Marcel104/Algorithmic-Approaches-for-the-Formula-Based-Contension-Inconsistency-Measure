@@ -1,7 +1,7 @@
 import re
 import os
 from sympy import symbols
-from sympy.logic.boolalg import to_cnf, Or, Not
+from sympy.logic.boolalg import to_cnf, Or, Not, And
 
 # Wandelt eine Wissensbasis in der angegebenen Datei in CNF um
 def parse_kb_to_cnf(filepath):
@@ -13,24 +13,10 @@ def parse_kb_to_cnf(filepath):
     knowledgebase_text = " & ".join([row.strip() for row in rows])
     knowledgebase_text = knowledgebase_text.replace("||", "|").replace("&&", "&").replace("!", "~")
 
-    max_symbol_index = -1
-    for match in re.findall(r"A(\d+)", knowledgebase_text):
-        num = int(match)
-        if num > max_symbol_index:
-            max_symbol_index = num
+    original_formulas = [row.strip().replace("||", "|").replace("&&", "&").replace("!", "~") for row in rows]
 
-    if max_symbol_index >= 0:
-        symbol_names = [f'A{i}' for i in range(max_symbol_index + 1)]
-        symbols_dic = symbols(symbol_names)
-        symbol_mapping = {name: symbol for name, symbol in zip(symbol_names, symbols_dic)}
-    else:
-        print(f"No symbols 'A<Zahl>' found in {filepath}.")
-        symbol_mapping = {}
-
-    for name, symbol in symbol_mapping.items():
-        knowledgebase_text = knowledgebase_text.replace(name, str(symbol))
-
-    cnf_knowledgebase = to_cnf(knowledgebase_text, simplify=False)
+    # Jede ursprüngliche Formel einzeln in CNF umwandeln
+    cnf_formulas = [[to_cnf(formula, simplify=False)] for formula in original_formulas]
 
     # Wissensbasis in Textform zu Zahlen umwandeln
     def lit_to_int(literal):
@@ -44,12 +30,16 @@ def parse_kb_to_cnf(filepath):
     def clause_to_list(clause):
         return [lit_to_int(lit) for lit in (clause.args if isinstance(clause, Or) else [clause])]
 
+    # Wissensbasis zusammensetzen
     K = []
-    if cnf_knowledgebase.is_Atom or isinstance(cnf_knowledgebase, Or):
-        K.append(clause_to_list(cnf_knowledgebase))
-    else:
-        for clause in cnf_knowledgebase.args:
-            K.append(clause_to_list(clause))
+    for cnf_formula_list in cnf_formulas:
+        cnf_formula = cnf_formula_list[0]
+        if cnf_formula.is_Atom or (isinstance(cnf_formula, Not) and cnf_formula.args[0].is_Atom) or isinstance(cnf_formula, Or):
+            K.append([clause_to_list(cnf_formula)])
+        elif isinstance(cnf_formula, And):
+            K.append([clause_to_list(clause) for clause in cnf_formula.args])
+        else:
+            K.append([])
 
     return K
 
