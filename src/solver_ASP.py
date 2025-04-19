@@ -1,12 +1,12 @@
 from clingo import Control
 
-def generate_asp_code(strukturierte_wissensbasis):
+def generate_asp_code(knowledgebase):
     atome = set()
     rules = []
     formula_counter = 0
 
     # Atome extrahieren und Negation prüfen
-    for formel in strukturierte_wissensbasis:
+    for formel in knowledgebase:
         for klausel in formel:
             for literal in klausel:
                 atom = abs(literal)
@@ -26,7 +26,7 @@ def generate_asp_code(strukturierte_wissensbasis):
 
     # ASP-Code für die Wissensbasis (Formeln und Klauseln)
     asp_code += "% Definition der Wissensbasis (Formeln und Klauseln)\n"
-    for formel_klauseln in strukturierte_wissensbasis:
+    for formel_klauseln in knowledgebase:
         formula_id = f"f{formula_counter}"
         rules.append(f"formula({formula_id}).")
         for i, klausel in enumerate(formel_klauseln):
