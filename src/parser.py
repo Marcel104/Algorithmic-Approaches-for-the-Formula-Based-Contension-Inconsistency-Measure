@@ -3,17 +3,16 @@ import os
 from sympy import symbols
 from sympy.logic.boolalg import to_cnf, Or, Not, And
 
-# Wandelt eine Wissensbasis in der angegebenen Datei in CNF um
-def parse_kb_to_cnf(filepath):
-
+def structure_knowledgebase(filepath):
     with open(filepath, "r") as myFile:
         rows = myFile.readlines()
 
-    # Wissensbasis in einheitliche Schreibweise umwandeln
-    knowledgebase_text = " & ".join([row.strip() for row in rows])
-    knowledgebase_text = knowledgebase_text.replace("||", "|").replace("&&", "&").replace("!", "~")
-
     original_formulas = [row.strip().replace("||", "|").replace("&&", "&").replace("!", "~") for row in rows]
+
+    return original_formulas
+
+# Wandelt eine Wissensbasis in der angegebenen Datei in CNF um
+def parse_kb_to_cnf(original_formulas):
 
     # Jede ursprüngliche Formel einzeln in CNF umwandeln
     cnf_formulas = [[to_cnf(formula, simplify=False)] for formula in original_formulas]
@@ -42,15 +41,3 @@ def parse_kb_to_cnf(filepath):
             K.append([])
 
     return K
-
-# Liest das gesamte Verzeichnis aus und gibt eine Liste der enthaltenen Dateien aus
-def process_directory(directory_path):
-    files = {}
-
-    for filename in os.listdir(directory_path):
-        if filename.endswith(".txt"):
-            filepath = os.path.join(directory_path, filename)
-            print(f"File found: {filepath}")
-            files[filename] = filepath
-
-    return files

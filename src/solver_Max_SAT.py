@@ -7,10 +7,6 @@ def generate_dynamic_clauses(knowledgebase):
     atoms = set()
     formula_atoms = {}
 
-    formula_offset = 0 
-
-    print(knowledgebase)
-
     for formula_idx, formula_clauses in enumerate(knowledgebase):
         atoms_in_formula = set()
         if isinstance(formula_clauses[0], list): # Überprüfen, ob die Klausel eine Liste ist
@@ -30,7 +26,7 @@ def generate_dynamic_clauses(knowledgebase):
     num_atoms = len(atoms)
     atom_mapping = {atom: (i + 1, i + num_atoms + 1, i + 2 * num_atoms + 1) for i, atom in enumerate(atoms)}
 
-    print(atom_mapping)
+    #print(atom_mapping)
 
     # Hard Clauses für dreiwertige Logik erstellen
     for atom, (a_true, a_false, a_both) in atom_mapping.items():
