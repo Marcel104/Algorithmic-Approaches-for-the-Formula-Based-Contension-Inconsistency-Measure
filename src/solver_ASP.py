@@ -1,123 +1,184 @@
-from clingo import Control
+from time import time
+from .formula import Formula
 
-def generate_asp_code(knowledgebase):
-    atome = set()
-    rules = []
-    formula_counter = 0
+TRUTH_VALUE_T = "t"
+TRUTH_VALUE_F = "f"
+TRUTH_VALUE_B = "b"
+FORMULA_IS_ATOM = "formula_is_atom"
+NEGATION = "negation"
+CONJUNCTION = "conjunction"
+DISJUNCTION = "disjunction"
+CONJUNCT_OF = "conjunct_of"
+DISJUNCT_OF = "disjunct_of"
+NUM_CONJUNCTS = "num_conjuncts"
+NUM_DISJUNCTS = "num_disjuncts"
+TRUTH_VALUE_PREDICATE = "val"
+ATOM = "atom"
+KB_MEMBER = "kb"
+FORMULA_PREFIX = "f"
+F_INCONSISTENT = "f_inconsistent"
 
-    # Atome extrahieren und Negation prüfen
-    for formel in knowledgebase:
-        for klausel in formel:
-            for literal in klausel:
-                atom = abs(literal)
-                atome.add(atom)
+class ASPEncoder:
+    def __init__(self):
+        self.start_time = time()
 
-    # ASP-Code für Atomdeklarationen
-    asp_code = "% Deklaration der Atome\n"
-    for atom in sorted(list(atome)):
-        asp_code += f"atom({atom}).\n"
-    asp_code += "\n"
+    def add_truth_values(self):
+        return f"tv({TRUTH_VALUE_T}).\ntv({TRUTH_VALUE_B}).\ntv({TRUTH_VALUE_F}).\n"
 
-    # ASP-Code für mögliche Wahrheitswerte
-    asp_code += "% Mögliche Wahrheitswerte für jedes Atom: true (t), false (f), both (b)\n"
-    asp_code += "{ val(A, t) } :- atom(A), not val(A, f), not val(A, b).\n"
-    asp_code += "{ val(A, f) } :- atom(A), not val(A, t), not val(A, b).\n"
-    asp_code += "{ val(A, b) } :- atom(A), not val(A, t), not val(A, f).\n\n"
+    def add_atom_rules(self, kb):
+        atoms = set()
+        for formula in kb.get_formulas():
+            atoms.update(formula.get_atoms())
+        return ''.join(f"{ATOM}({a.lower()}).\n" for a in atoms)
 
-    # ASP-Code für die Wissensbasis (Formeln und Klauseln)
-    asp_code += "% Definition der Wissensbasis (Formeln und Klauseln)\n"
-    for formel_klauseln in knowledgebase:
-        formula_id = f"f{formula_counter}"
-        rules.append(f"formula({formula_id}).")
-        for i, klausel in enumerate(formel_klauseln):
-            klausel_id = f"k{i}"
-            rules.append(f"klausel({formula_id}, {klausel_id}).")
-            for literal in klausel:
-                atom = abs(literal)
-                if literal < 0:
-                    neg_id = f"neg_{atom}"
-                    rules.append(f"neg_atom({atom}, {neg_id}).")
-                    rules.append(f"in_klausel({formula_id}, {klausel_id}, {neg_id}).")
-                else:
-                    rules.append(f"in_klausel({formula_id}, {klausel_id}, {atom}).")
-        formula_counter += 1
-    asp_code += "\n".join(rules) + "\n\n"
+    def pl_to_asp(self, formula, formula_name, rules):
+        if formula.is_atom():
+            atom_name = formula.get_name().lower()
+            rules.append(f"{FORMULA_IS_ATOM}({formula_name},{atom_name}).\n")
+            return
 
-    # ASP-Code für die Erfüllung von Klauseln
-    asp_code += "% Eine Klausel ist erfüllt, wenn mindestens ein Literal in ihr wahr ist\n"
-    asp_code += "klausel_erfuellt(F, K) :- klausel(F, K), in_klausel(F, K, L), literal_satisfied(L).\n\n"
+        if formula.is_negation():
+            sub = next(iter(formula.get_subformulas()))
+            new_formula_name = formula_name + "_n"
+            rules.append(f"{NEGATION}({new_formula_name},{formula_name}).\n")
+            self.pl_to_asp(sub, new_formula_name, rules)
+            return
 
-    # ASP-Code für die Erfüllung von Formeln
-    asp_code += "% Eine Formel ist erfüllt, wenn alle ihre Klauseln erfüllt sind\n"
-    asp_code += "erfuellt(F, K) :- formula(F), klausel(F, K), klausel_erfuellt(F, K).\n"
-    asp_code += "formel_erfuellt(F) :- formula(F), not not erfuellt(F, K) : klausel(F, K).\n\n"
+        if formula.is_conjunction():
+            conjuncts = formula.get_subformulas()
+            rules.append(f"{CONJUNCTION}({formula_name}).")
+            rules.append(f"{NUM_CONJUNCTS}({formula_name},{len(conjuncts)}).\n")
+            for i, conjunct in enumerate(conjuncts):
+                sub_name = f"{formula_name}_{i}"
+                rules.append(f"{CONJUNCT_OF}({sub_name},{formula_name}).\n")
+                self.pl_to_asp(conjunct, sub_name, rules)
+            return
 
-    # ASP-Code für die Erfüllung eines Literals
-    asp_code += "% Ein Literal ist erfüllt:\n"
-    asp_code += "literal_satisfied(A) :- val(A, t).\n"
-    asp_code += "literal_satisfied(A) :- val(A, b).\n"
-    asp_code += "literal_satisfied(N) :- neg_atom(B, N), val(B, f).\n"
-    asp_code += "literal_satisfied(N) :- neg_atom(B, N), val(B, b).\n\n"
+        if formula.is_disjunction():
+            disjuncts = formula.get_subformulas()
+            rules.append(f"{DISJUNCTION}({formula_name}).")
+            rules.append(f"{NUM_DISJUNCTS}({formula_name},{len(disjuncts)}).\n")
+            for i, disjunct in enumerate(disjuncts):
+                sub_name = f"{formula_name}_{i}"
+                rules.append(f"{DISJUNCT_OF}({sub_name},{formula_name}).\n")
+                self.pl_to_asp(disjunct, sub_name, rules)
+            return
 
-    # Bedingung, dass alle Formeln erfüllt sein müssen
-    asp_code += "% Alle Formeln müssen erfüllt sein\n"
-    asp_code += ":- formula(F), not formel_erfuellt(F).\n\n"
+        if formula.is_implication():
+            left, right = formula.get_subformulas()
+            disj = Formula('or', Formula('not', left), right)
+            self.pl_to_asp(disj, formula_name, rules)
+            return
 
-    # ASP-Code zur Identifizierung der inkonsistenten Formeln
-    asp_code += "% Eine Formel ist inkonsistent, wenn sie ein Atom mit dem Wert both enthält\n"
-    asp_code += "f_inconsistent(F) :- formula(F), in_klausel(F, K, A), val(A, b), not neg_atom(_, A).\n"
-    asp_code += "f_inconsistent(F) :- formula(F), in_klausel(F, K, N), neg_atom(A, N), val(A, b).\n\n"
-    asp_code += "#minimize { 1 : f_inconsistent(F) }.\n\n"
+        if formula.is_equivalence():
+            left, right = formula.get_subformulas()
+            disj1 = Formula('or', Formula('not', left), right)
+            disj2 = Formula('or', Formula('not', right), left)
+            conj = Formula('and', disj1, disj2)
+            self.pl_to_asp(conj, formula_name, rules)
+            return
 
-    # Ausgabeanweisungen
-    asp_code += "both(A) :- val(A, b).\n\n"
-    asp_code += "#show val/2.\n"
-    asp_code += "#show formel_erfuellt/1.\n"
-    asp_code += "#show f_inconsistent/1.\n"
-    asp_code += "#show both/1.\n"
+        if formula.is_tautology():
+            rules.append(f"{TRUTH_VALUE_PREDICATE}({formula_name},{TRUTH_VALUE_T}).\n")
+            return
 
+        if formula.is_contradiction():
+            rules.append(f"{TRUTH_VALUE_PREDICATE}({formula_name},{TRUTH_VALUE_F}).\n")
+            return
 
-    return asp_code
+    def handle_formulas_in_kb(self, kb):
+        formula_rules = []
+        for i, formula in enumerate(kb.get_formulas()):
+            formula_name = f"{FORMULA_PREFIX}{i}"
+            formula_rules.append(f"{KB_MEMBER}({formula_name}).\n")
+            self.pl_to_asp(formula, formula_name, formula_rules)
+        return ''.join(formula_rules)
 
-# Führt den ASP Code in Clingo aus
-def run_clingo(asp_code):
-    try:
-        ctl = Control(["0"])
-        ctl.configuration.solve.opt_mode = "opt"
-        ctl.add("base", [], asp_code)
-        ctl.ground([("base", [])])
+    def add_conjunction_rules(self):
+        return (
+            f"{TRUTH_VALUE_PREDICATE}(Y,{TRUTH_VALUE_T}):{CONJUNCTION}(Y):-N{{"
+            f"{TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_T}):{CONJUNCT_OF}(X,Y)}}N,"
+            f"{NUM_CONJUNCTS}(Y,N).\n"
+            f"{TRUTH_VALUE_PREDICATE}(Y,{TRUTH_VALUE_F}):{CONJUNCTION}(Y):-1{{"
+            f"{TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_F})}},{CONJUNCT_OF}(X,Y).\n"
+            f"{TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_B}):-{CONJUNCTION}(X),"
+            f"not {TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_T}),"
+            f"not {TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_F}).\n"
+        )
 
-        answer_sets = []
-        with ctl.solve(yield_=True) as handle:
-            for model in handle:
-                answer_sets.append(model.symbols(shown=True))
-        return answer_sets
-    except Exception as e:
-        print(f"Error (Clingo):\n{e}")
-        return None
+    def add_disjunction_rules(self):
+        return (
+            f"{TRUTH_VALUE_PREDICATE}(Y,{TRUTH_VALUE_T}):{DISJUNCTION}(Y):-1{{"
+            f"{TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_T})}},{DISJUNCT_OF}(X,Y).\n"
+            f"{TRUTH_VALUE_PREDICATE}(Y,{TRUTH_VALUE_F}):{DISJUNCTION}(Y):-N{{"
+            f"{TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_F}):{DISJUNCT_OF}(X,Y)}}N,"
+            f"{NUM_DISJUNCTS}(Y,N).\n"
+            f"{TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_B}):-{DISJUNCTION}(X),"
+            f"not {TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_T}),"
+            f"not {TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_F}).\n"
+        )
 
-def solve_asp(knowledgebase):
-    asp_code = generate_asp_code(knowledgebase)
+    def add_negation_rules(self):
+        return (
+            f"{TRUTH_VALUE_PREDICATE}(Y,{TRUTH_VALUE_T}):-{NEGATION}(X,Y),"
+            f"{TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_F}).\n"
+            f"{TRUTH_VALUE_PREDICATE}(Y,{TRUTH_VALUE_F}):-{NEGATION}(X,Y),"
+            f"{TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_T}).\n"
+            f"{TRUTH_VALUE_PREDICATE}(Y,{TRUTH_VALUE_B}):-{NEGATION}(X,Y),"
+            f"{TRUTH_VALUE_PREDICATE}(X,{TRUTH_VALUE_B}).\n"
+        )
+    
+    def add_formula_atom_links(self, kb):
+        rules = []
+        for i, formula in enumerate(kb.get_formulas()):
+            formula_name = f"{FORMULA_PREFIX}{i}"
+            atoms = formula.get_atoms()
+            for atom in atoms:
+                rules.append(f"formula_contains_atom({formula_name},{atom.lower()}).\n")
+        return ''.join(rules)
 
-    # ASP Code in Datei schreiben
-    #with open("generated_ASP_Code.lp", "w") as f:
-        #f.write(asp_code)
+    def encode(self, kb):
+        if len(kb.get_formulas()) == 0:
+            return 0
 
-    answer_sets = run_clingo(asp_code)
+        program = ""
 
-    both_atoms = []
-    inconsistent_count = 0
+        # Truth-Values facts
+        program += self.add_truth_values()
 
-    if answer_sets:
-        solution_found = True
-        first_set = answer_sets[0]
-        for symbol in first_set:
-            if symbol.name == "both" and len(symbol.arguments) == 1:
-                both_atoms.append(symbol.arguments[0].number)
-            elif symbol.name == "f_inconsistent":
-                inconsistent_count += 1
-    else:
-        solution_found = False
-        print("\nNo Answer Sets found.")
+        # formula cant be false
+        program += f":- {TRUTH_VALUE_PREDICATE}(X, {TRUTH_VALUE_F}), {KB_MEMBER}(X).\n"
 
-    return solution_found, both_atoms, inconsistent_count
+        # exactly one truth value for each atom
+        program += f"1{{{TRUTH_VALUE_PREDICATE}(X,Y) : tv(Y)}}1 :- {ATOM}(X).\n"
+
+        # atom facts, incl. formula_is_atom
+        program += self.add_atom_rules(kb)
+
+        # rules for formulas in the knowledge base
+        program += self.handle_formulas_in_kb(kb)
+
+        # Connectivity rules for formulas
+        program += f"{TRUTH_VALUE_PREDICATE}(X,Z):tv(Z):- {FORMULA_IS_ATOM} (X,Y), {TRUTH_VALUE_PREDICATE} (Y,Z).\n"
+        if CONJUNCTION in program:
+            program += self.add_conjunction_rules()
+        if DISJUNCTION in program:
+            program += self.add_disjunction_rules()
+        if NEGATION in program:
+            program += self.add_negation_rules()
+
+        # rules to comvine formulas and their atoms
+        program += self.add_formula_atom_links(kb)
+
+        # A Formula is inconsistent if it contains at least one atom with the value 'b'
+        program += f"{F_INCONSISTENT}(F) :- {KB_MEMBER}(F), formula_contains_atom(F,A), {TRUTH_VALUE_PREDICATE}(A,{TRUTH_VALUE_B}).\n"
+
+        # at least inconsistwent formulas as possible
+        program += f"#minimize {{ 1,F : {F_INCONSISTENT}(F) }}.\n"
+
+        #print(program)
+
+        end_time = time()
+        elapsed_time = end_time - self.start_time
+
+        return program, elapsed_time
