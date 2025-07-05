@@ -1,6 +1,5 @@
 from pysat.formula import WCNF
 from pysat.formula import CNF, IDPool
-from itertools import count
 from src.formula import Formula, FormulaType, CnfTransformation
 from time import time
 
@@ -40,7 +39,7 @@ class MaxSatEncoder:
     def encode(self):
         wcnf = WCNF()
 
-        # A_true/A_false/A_both-Constraints für Originalatome
+        # A_true/A_false/A_both constraints fpr original atoms
         all_atoms = set().union(*self.original_atoms_per_formula)
         for atom in all_atoms:
             a_true = self.get_var(atom, 't')
@@ -60,12 +59,12 @@ class MaxSatEncoder:
 
             original_atoms = self.original_atoms_per_formula[idx]
 
-            # F_inconsistent_i ∨ ¬A_both für jedes Originalatom
+            # F_inconsistent_i ∨ ¬A_both for each original atom
             for atom in original_atoms:
                 a_both = self.get_var(atom, 'b')
                 wcnf.append([finc, -a_both])
 
-            # Tseitin-Klauseln erzeugen mit globalem Pool und atom-ID-Reuse
+            # create tseitin clauses with a global variable pool
             top_var, tseitin_clauses = formula.to_cnf(
                 method=CnfTransformation.TSEITIN,
                 id_pool=self.pool,
@@ -73,7 +72,7 @@ class MaxSatEncoder:
             )
 
             if not tseitin_clauses:
-                # Atomare Formel ohne Tseitin-Klauseln
+                # atomic formulas without tseitin clauses
                 atoms_in_clause = self.get_atoms_from_clause_ids([top_var])
                 extended_clause = [top_var] + [self.get_var(atom, 'b') for atom in atoms_in_clause if atom in original_atoms]
                 wcnf.append(extended_clause)

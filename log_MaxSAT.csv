@@ -3764,10 +3764,6 @@ data\ML\animals_0.65_0.75_4_1.aspic.pl;animals_0.65_0.75_4_1.aspic.pl;MaxSAT (Na
 data\ML\animals_0.65_0.75_4_1.aspic.pl;animals_0.65_0.75_4_1.aspic.pl;MaxSAT (Tseitin);-19995,19;19995,19;0.1;0;0;0;786554
 data\ML\animals_0.65_0.75_4_2.aspic.pl;animals_0.65_0.75_4_2.aspic.pl;MaxSAT (Naiv);-2951,11;2951,11;0.1;0;0;0;194450
 data\ML\animals_0.65_0.75_4_2.aspic.pl;animals_0.65_0.75_4_2.aspic.pl;MaxSAT (Tseitin);-18259,05;18259,05;0.1;0;0;0;786556
-data\Test\Test.pl;Test.pl;MaxSAT (Naiv);;;0.1;0;0;0;56
-data\Test\Test.pl;Test.pl;MaxSAT (Tseitin);-1,01;1,01;0.1;0;0;0;62
-data\Test\Test.pl;Test.pl;MaxSAT (Naiv);-4,98;4,98;0.1;0;0;0;183
-data\Test\Test.pl;Test.pl;MaxSAT (Tseitin);-3,98;3,98;0.1;0;0;0;95
 data\ARG\A-1-admbuster_1000.tgf.pl;A-1-admbuster_1000.tgf.pl;MaxSAT (Naiv);-366,16;366,16;0.1;0;0;0;9354
 data\ARG\A-1-admbuster_1000.tgf.pl;A-1-admbuster_1000.tgf.pl;MaxSAT (Tseitin);-2930,66;2930,66;0.1;0;0;0;16345
 data\ARG\A-1-admbuster_2000.tgf.pl;A-1-admbuster_2000.tgf.pl;MaxSAT (Naiv);-1446,30;1446,30;0.1;0;0;0;18768

@@ -11,7 +11,7 @@ class Kb:
         if method == CnfTransformation.NAIVE:
             return [f.to_cnf(method=method) for f in self.formulas]
         else:
-            raise NotImplementedError("you have to call Tseitin transformation inside the solver per formula")
+            raise NotImplementedError("call Tseitin transformation inside the solver per formula!")
 
     def __str__(self):
         return "\n".join(map(str, self.formulas))
