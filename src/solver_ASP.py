@@ -1,5 +1,5 @@
 from time import time
-from .formula import Formula
+from .formula import Formula, FormulaType
 
 TRUTH_VALUE_T = "t"
 TRUTH_VALUE_F = "f"
@@ -46,7 +46,7 @@ class ASPEncoder:
 
         if formula.is_conjunction():
             conjuncts = formula.get_subformulas()
-            rules.append(f"{CONJUNCTION}({formula_name}).")
+            rules.append(f"{CONJUNCTION}({formula_name}).\n")
             rules.append(f"{NUM_CONJUNCTS}({formula_name},{len(conjuncts)}).\n")
             for i, conjunct in enumerate(conjuncts):
                 sub_name = f"{formula_name}_{i}"
@@ -56,7 +56,7 @@ class ASPEncoder:
 
         if formula.is_disjunction():
             disjuncts = formula.get_subformulas()
-            rules.append(f"{DISJUNCTION}({formula_name}).")
+            rules.append(f"{DISJUNCTION}({formula_name}).\n")
             rules.append(f"{NUM_DISJUNCTS}({formula_name},{len(disjuncts)}).\n")
             for i, disjunct in enumerate(disjuncts):
                 sub_name = f"{formula_name}_{i}"
@@ -66,15 +66,15 @@ class ASPEncoder:
 
         if formula.is_implication():
             left, right = formula.get_subformulas()
-            disj = Formula('or', Formula('not', left), right)
+            disj = Formula(FormulaType.OR, Formula(FormulaType.NOT, left), right)
             self.pl_to_asp(disj, formula_name, rules)
             return
 
         if formula.is_equivalence():
             left, right = formula.get_subformulas()
-            disj1 = Formula('or', Formula('not', left), right)
-            disj2 = Formula('or', Formula('not', right), left)
-            conj = Formula('and', disj1, disj2)
+            disj1 = Formula(FormulaType.OR, Formula(FormulaType.NOT, left), right)
+            disj2 = Formula(FormulaType.OR, Formula(FormulaType.NOT, right), left)
+            conj = Formula(FormulaType.AND, disj1, disj2)
             self.pl_to_asp(conj, formula_name, rules)
             return
 
@@ -144,7 +144,7 @@ class ASPEncoder:
         program = ""
 
         # Truth-Values facts
-        program += self.add_truth_values()
+        program += self.add_truth_values() # noch in Arbeit erklären
 
         # formula cant be false
         program += f":- {TRUTH_VALUE_PREDICATE}(X, {TRUTH_VALUE_F}), {KB_MEMBER}(X).\n"
@@ -152,14 +152,14 @@ class ASPEncoder:
         # exactly one truth value for each atom
         program += f"1{{{TRUTH_VALUE_PREDICATE}(X,Y) : tv(Y)}}1 :- {ATOM}(X).\n"
 
-        # atom facts, incl. formula_is_atom
+        # atom facts, with formula_is_atom
         program += self.add_atom_rules(kb)
 
         # rules for formulas in the knowledge base
         program += self.handle_formulas_in_kb(kb)
 
         # Connectivity rules for formulas
-        program += f"{TRUTH_VALUE_PREDICATE}(X,Z):tv(Z):- {FORMULA_IS_ATOM} (X,Y), {TRUTH_VALUE_PREDICATE} (Y,Z).\n"
+        program += f"{TRUTH_VALUE_PREDICATE}(X,Z):tv(Z):- {FORMULA_IS_ATOM} (X,Y), {TRUTH_VALUE_PREDICATE} (Y,Z).\n" # noch in Arbeit erklären
         if CONJUNCTION in program:
             program += self.add_conjunction_rules()
         if DISJUNCTION in program:
@@ -167,14 +167,17 @@ class ASPEncoder:
         if NEGATION in program:
             program += self.add_negation_rules()
 
-        # rules to comvine formulas and their atoms
+        # rules to combine formulas and their atoms
         program += self.add_formula_atom_links(kb)
 
         # A Formula is inconsistent if it contains at least one atom with the value 'b'
-        program += f"{F_INCONSISTENT}(F) :- {KB_MEMBER}(F), formula_contains_atom(F,A), {TRUTH_VALUE_PREDICATE}(A,{TRUTH_VALUE_B}).\n"
+        program += f"{F_INCONSISTENT}(F) :- {KB_MEMBER}(F), formula_contains_atom(F,A), {TRUTH_VALUE_PREDICATE}(A,{TRUTH_VALUE_B}).\n" # formula_contains_atom noch in Arbeit erklären
 
         # at least inconsistwent formulas as possible
         program += f"#minimize {{ 1,F : {F_INCONSISTENT}(F) }}.\n"
+
+        program += f"#show val(X,Y) : atom(X), val(X,Y).\n"
+        program += f"#show f_inconsistent/1.\n"
 
         #print(program)
 

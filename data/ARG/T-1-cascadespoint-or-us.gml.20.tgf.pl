@@ -1,0 +1,10 @@
+(arg_a3<=>!arg_a1)
+arg_a1
+(arg_a4<=>!arg_a2&&!arg_a6)
+(arg_a5<=>!arg_a4)
+arg_a6
+(arg_a2<=>!arg_a5)
+(arg_a6<=>!arg_a4&&!arg_a5)
+(arg_a7<=>!arg_a3&&!arg_a5)
+arg_a2
+arg_a5

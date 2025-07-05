@@ -1,4 +1,5 @@
 from enum import Enum
+from pysat.formula import IDPool
 
 class FormulaType(Enum):
     ATOM = 1
@@ -10,6 +11,9 @@ class FormulaType(Enum):
     IMPLIES = 7
     IFF = 8
 
+class CnfTransformation(Enum):
+    NAIVE = 1
+    TSEITIN = 2
 
 class Formula:
     def __init__(self, type, left=None, right=None, atom=None):
@@ -113,11 +117,73 @@ class Formula:
         else:
             return self
 
-    def to_cnf(self):
-        return self.eliminate_iff() \
-                   .eliminate_implies() \
-                   .push_not_inwards() \
-                   .distribute_or_over_and()
+    def to_cnf(self, method=CnfTransformation.NAIVE, id_pool=None, atom_true_varmap=None):
+        if method == CnfTransformation.NAIVE:
+            return self.eliminate_iff() \
+                       .eliminate_implies() \
+                       .push_not_inwards() \
+                       .distribute_or_over_and()
+        elif method == CnfTransformation.TSEITIN:
+            if id_pool is None or atom_true_varmap is None:
+                raise ValueError("id_pool and atom_true_varmap missing")
+            clauses = []
+            top_var = self._to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
+            return top_var, clauses
+        else:
+            raise ValueError("unknown CNF transformation method.")
+
+    def _to_cnf_tseitin_recursive(self, id_pool, atom_true_varmap, clauses):
+        if self.type == FormulaType.ATOM:
+            return atom_true_varmap[self.atom]
+
+        elif self.type == FormulaType.TRUE:
+            v = id_pool.id()
+            clauses.append([v])
+            return v
+
+        elif self.type == FormulaType.FALSE:
+            v = id_pool.id()
+            clauses.append([-v])
+            return v
+        
+        elif self.type == FormulaType.NOT:
+            a = self.left._to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
+            v = id_pool.id()
+            clauses.append([-v, -a])
+            clauses.append([v, a])
+            return v
+
+        a = self.left._to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
+        b = self.right._to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
+        v = id_pool.id()
+
+        if self.type == FormulaType.AND:
+            clauses.append([-v, a])
+            clauses.append([-v, b])
+            clauses.append([v, -a, -b])
+            return v
+
+        elif self.type == FormulaType.OR:
+            clauses.append([v, -a])
+            clauses.append([v, -b])
+            clauses.append([-v, a, b])
+            return v
+
+        elif self.type == FormulaType.IMPLIES:
+            clauses.append([-v, -a, b])
+            clauses.append([v, a])
+            clauses.append([v, -b])
+            return v
+
+        elif self.type == FormulaType.IFF:
+            clauses.append([-v, -a, b])
+            clauses.append([-v, a, -b])
+            clauses.append([v, a, b])
+            clauses.append([v, -a, -b])
+            return v
+        
+        else:
+            raise RuntimeError("unknown formula type")
 
     def get_atoms(self):
         if self.type == FormulaType.ATOM:

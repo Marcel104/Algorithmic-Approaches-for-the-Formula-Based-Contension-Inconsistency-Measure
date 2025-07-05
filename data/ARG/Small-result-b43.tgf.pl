@@ -1,0 +1,13 @@
+(arg_a0_0<=>!arg_a5_2)
+(arg_a4_2<=>!arg_a9_6&&!arg_a8_2&&!arg_a2_2&&!arg_a5_2)
+(arg_a9_6<=>!arg_a11_6&&!arg_a4_2&&!arg_a5_2&&!arg_a10_2)
+(arg_a3_0<=>!arg_a9_6&&!arg_a8_2&&!arg_a2_2)
+(arg_a2_2<=>!arg_a11_6&&!arg_a4_2&&!arg_a5_2&&!arg_a10_2)
+(arg_a5_2<=>!arg_a9_6&&!arg_a11_6&&!arg_a8_2&&!arg_a2_2&&!arg_a4_2&&!arg_a10_2)
+(arg_a11_6<=>!arg_a9_6&&!arg_a8_2&&!arg_a2_2&&!arg_a5_2)
+(arg_a6_0<=>!arg_a5_2)
+arg_a7_2
+(arg_a8_2<=>!arg_a11_6&&!arg_a4_2&&!arg_a5_2&&!arg_a10_2)
+(arg_a7_2<=>!arg_a5_2)
+(arg_a1_0<=>!arg_a11_6&&!arg_a4_2&&!arg_a10_2)
+(arg_a10_2<=>!arg_a9_6&&!arg_a8_2&&!arg_a2_2&&!arg_a5_2)

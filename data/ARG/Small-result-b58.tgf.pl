@@ -1,0 +1,9 @@
+(arg_a3_6<=>!arg_a1_0)
+(arg_a3_4<=>!arg_a1_0)
+arg_a1_0
+(arg_a1_0<=>!arg_a3_6&&!arg_a2_2&&!arg_a3_2&&!arg_a3_4&&!arg_a0_0&&!arg_a2_0&&!arg_a2_1)
+(arg_a2_0<=>!arg_a1_0)
+(arg_a0_0<=>!arg_a1_0)
+(arg_a3_2<=>!arg_a1_0)
+(arg_a2_2<=>!arg_a1_0)
+(arg_a2_1<=>!arg_a1_0)

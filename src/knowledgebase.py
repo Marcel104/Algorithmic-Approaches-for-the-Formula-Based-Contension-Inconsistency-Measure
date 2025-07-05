@@ -1,3 +1,5 @@
+from .formula import Formula, CnfTransformation
+
 class Kb:
     def __init__(self):
         self.formulas = []
@@ -5,8 +7,11 @@ class Kb:
     def add(self, formula):
         self.formulas.append(formula)
 
-    def to_cnf(self):
-        return [f.to_cnf() for f in self.formulas]
+    def to_cnf(self, method=CnfTransformation.NAIVE):
+        if method == CnfTransformation.NAIVE:
+            return [f.to_cnf(method=method) for f in self.formulas]
+        else:
+            raise NotImplementedError("you have to call Tseitin transformation inside the solver per formula")
 
     def __str__(self):
         return "\n".join(map(str, self.formulas))
