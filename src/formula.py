@@ -127,12 +127,12 @@ class Formula:
             if id_pool is None or atom_true_varmap is None:
                 raise ValueError("id_pool and atom_true_varmap missing")
             clauses = []
-            top_var = self._to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
+            top_var = self.to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
             return top_var, clauses
         else:
             raise ValueError("unknown CNF transformation method.")
 
-    def _to_cnf_tseitin_recursive(self, id_pool, atom_true_varmap, clauses):
+    def to_cnf_tseitin_recursive(self, id_pool, atom_true_varmap, clauses):
         if self.type == FormulaType.ATOM:
             return atom_true_varmap[self.atom]
 
@@ -147,14 +147,14 @@ class Formula:
             return v
         
         elif self.type == FormulaType.NOT:
-            a = self.left._to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
+            a = self.left.to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
             v = id_pool.id()
             clauses.append([-v, -a])
             clauses.append([v, a])
             return v
 
-        a = self.left._to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
-        b = self.right._to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
+        a = self.left.to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
+        b = self.right.to_cnf_tseitin_recursive(id_pool, atom_true_varmap, clauses)
         v = id_pool.id()
 
         if self.type == FormulaType.AND:

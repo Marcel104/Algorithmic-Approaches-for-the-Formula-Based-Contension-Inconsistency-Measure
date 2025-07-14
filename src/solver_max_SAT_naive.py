@@ -2,7 +2,6 @@ from pysat.formula import WCNF
 from itertools import count
 from src.formula import FormulaType
 from time import time
-
 from pysat.formula import CNF, IDPool
 from src.formula import Formula, FormulaType
 

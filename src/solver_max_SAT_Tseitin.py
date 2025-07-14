@@ -39,7 +39,7 @@ class MaxSatEncoder:
     def encode(self):
         wcnf = WCNF()
 
-        # A_true/A_false/A_both constraints fpr original atoms
+        # A_true/A_false/A_both constraints for original atoms
         all_atoms = set().union(*self.original_atoms_per_formula)
         for atom in all_atoms:
             a_true = self.get_var(atom, 't')
