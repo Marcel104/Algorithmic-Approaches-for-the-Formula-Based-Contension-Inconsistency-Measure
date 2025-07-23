@@ -17,9 +17,10 @@ $I_{fc}$ is formulawise satisfiability-oriented: each formula is checked individ
 
 # Project Structure
 
-![Uploading Classdiagramm.png…]()
+<img width="720" height="743" alt="Classdiagramm" src="https://github.com/user-attachments/assets/be730ae6-a4fa-4444-9dfb-5b703933d818" />
 
 # Experiment Orchestration
+
 
 The *main.py* script is the execution entry point and manages the entire experiment lifecycle. The process is initiated within the if *__name__ == "__main__"* clause.
 Initially, CSV log files are initialized with appropriate headers. Then, the *get_all_files()* function scans the data directory and compiles a list of all knowl-
