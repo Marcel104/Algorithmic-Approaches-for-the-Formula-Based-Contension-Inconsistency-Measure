@@ -11,24 +11,18 @@ Ifc now calculates the minimum of formulas, where at least one atom got assigned
 The *main.py* script is the execution entry point and manages the entire experiment
 lifecycle. The process is initiated within the if *__name__ == "__main__"* clause.
 Initially, CSV log files are initialized with appropriate headers. Then, the *get_all_files()* function scans the data directory and compiles a list of all knowl-
-edge bases to be processed. In the main loop, each file is read in, and for each knowledgebase, the three solving functions *asp_encode_and_solve()*,
+edge bases to be processed. In the main loop, each file is read in, and for each knowledgebase, the three solving functions *asp_encode_and_solve()*, *maxsat_encode_and_solve()*, and *maxsat_tseitin_encode_and_solve()* are called.
 
-*maxsat_encode_and_solve()*, and *maxsat_tseitin_encode_and_solve()* are called.
-To ensure the robustness of the experimental process, each solver call is wrapped
-by the *run_without_timeout function*. This function starts the solver in a separate
-process and enforces a hard time limit of 1000 seconds. If the solver fails or exceeds
-the time limit, the process is safely terminated and the error or timeout is logged
-without interrupting the overall experiment.
+To ensure the robustness of the experimental process, each solver call is wrapped by the *run_without_timeout function*. This function starts the solver in a separate process and enforces a hard time limit of 1000 seconds. 
+If the solver fails or exceeds the time limit, the process is safely terminated and the error or timeout is logged without interrupting the overall experiment.
 Result extraction is implemented in a solver-specific manner. 
 The function *asp_encode_and_solve* uses the *on_model* callback function from the Clingo library. 
 For each optimal model found, this callback extracts the cost and the atoms of the *val/2* and *f_inconsistent/1* predicates to reconstruct the solution details.
 
-The MaxSAT functions use the RC2 solver from the PySAT library. After computing
-the result using *rc2.compute()*, the cost is directly read from the solver object. To
-retrieve solution details, the returned model is analyzed and integer variables are
-translated back into their boolean interpretations using a reverse_varmap. The violated soft clauses reveal the inconsistent formulas.
-All collected data, including precise runtime measurements for encoding and
-solving, are written by write_result to two separate CSV files: *log_file_general.csv*
-for general results and *log_file_maxsat.csv* for additional MaxSAT-specific metrics
-such as the number of hard clauses.
+The MaxSAT functions use the RC2 solver from the PySAT library. 
+After computing the result using *rc2.compute()*, the cost is directly read from the solver object. 
+To retrieve solution details, the returned model is analyzed and integer variables are translated back into their boolean interpretations using a reverse_varmap. 
+The violated soft clauses reveal the inconsistent formulas.
+All collected data, including precise runtime measurements for encoding and solving, are written by write_result to two separate CSV files: *log_file_general.csv* for general results and *log_file_maxsat.csv* for additional MaxSAT-specific metrics such as the number of hard clauses.
+
 <img width="522" height="772" alt="Blockdiagramm" src="https://github.com/user-attachments/assets/929fc55c-dacd-42d1-a7ce-48b355e1af3b" />
