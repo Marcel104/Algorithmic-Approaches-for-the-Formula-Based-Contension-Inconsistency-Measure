@@ -1,12 +1,19 @@
 # Introduction
 
 This project is based on the Master-Thesis 'Algorithmic Approaches for the Formula-Based Contension Inconsistency Measure' at the 'Fernuniversität in Hagen'.
+
+Inconsistency measures are used to quantitatively measure the degree of logical inconsistency. 
+For example, they can provide information about the number of logical contradictions within a collection of statements, which also allows for more in-depth analysis or localization. 
+Such a collection of statements is also called a knowledge base, which can be expanded accordingly by deriving rules between the existing statements.
+
 The agorithmic approaches, provided in this project, use Max SAT Solver and Answer Set Programming.
 
 # Formula-Based Contension Inconsistency Measure
 
 To calculate the formula-based contension inconsistency measure ($I_{fc}$) we use the three-valued logic by Graham Priest where we can assign each Atom a third truth-value 'both'.
 $I_{fc}$ now calculates the minimum of formulas, where at least one atom got assigned the value 'both'.
+
+$I_{fc}$ is formulawise satisfiability-oriented: each formula is checked individually whether it needs a both-valued atom to be satisfied. This leads to syntactic sensitivity as logically equivalent transformations can change the number of formulas and how they are affected by both-assignments.
 
 # Experiment Orchestration
 
