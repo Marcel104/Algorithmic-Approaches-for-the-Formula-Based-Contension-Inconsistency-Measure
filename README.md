@@ -10,9 +10,7 @@ Ifc now calculates the minimum of formulas, where at least one atom got assigned
 
 The *main.py* script is the execution entry point and manages the entire experiment
 lifecycle. The process is initiated within the if *__name__ == "__main__"* clause.
-Initially, CSV log files are initialized with appropriate headers. Then, the
-
-*get_all_files()* function scans the data directory and compiles a list of all knowl-
+Initially, CSV log files are initialized with appropriate headers. Then, the *get_all_files()* function scans the data directory and compiles a list of all knowl-
 edge bases to be processed. In the main loop, each file is read in, and for each knowl-
 edge base, the three solving functions *asp_encode_and_solve()*,
 
