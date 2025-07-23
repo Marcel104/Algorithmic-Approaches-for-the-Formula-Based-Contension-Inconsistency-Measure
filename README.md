@@ -2,11 +2,8 @@ This project is based on the Master-Thesis 'Algorithmic Approaches for the Formu
 
 # Formula-Based Contension Inconsistency Measure
 
-The formula-based contension inconsistency measure (Ifc) $I_{fc}$ evaluates how many formulas in the knowledge base must contain at least one atom assigned \emph{both} in order for the whole knowledge base to be satisfiable. Hence, it focuses on formulas affected by conflict.
-
-To calculate the Ifc we use the three-valued logic by Graham Priest where we can assign each Atom a third truth-value 'both'.
+To calculate the formula-based contension inconsistency measure ($I_{fc}$) we use the three-valued logic by Graham Priest where we can assign each Atom a third truth-value 'both'.
 Ifc now calculates the minimum of formulas, where at least one atom got assigned the value 'both'. The agorithmic approaches, provided in this project, use Max SAT Solver and Answer Set Programming.
-
 
 # Experiment Orchestration
 
