@@ -17,7 +17,7 @@ $I_{fc}$ is formulawise satisfiability-oriented: each formula is checked individ
 
 # Project Structure
 
-<img width="720" height="743" alt="Classdiagramm" src="https://github.com/user-attachments/assets/be730ae6-a4fa-4444-9dfb-5b703933d818" />
+<img width="522" height="772" alt="Blockdiagramm" src="https://github.com/user-attachments/assets/a056342a-a59f-49d5-91bd-3d05951d9a6a" />
 
 # Experiment Orchestration
 
@@ -37,3 +37,5 @@ After computing the result using *rc2.compute()*, the cost is directly read from
 To retrieve solution details, the returned model is analyzed and integer variables are translated back into their boolean interpretations using a reverse_varmap. 
 The violated soft clauses reveal the inconsistent formulas.
 All collected data, including precise runtime measurements for encoding and solving, are written by write_result to two separate CSV files: *log_file_general.csv* for general results and *log_file_maxsat.csv* for additional MaxSAT-specific metrics such as the number of hard clauses.
+
+<img width="720" height="743" alt="Classdiagramm" src="https://github.com/user-attachments/assets/be730ae6-a4fa-4444-9dfb-5b703933d818" />
