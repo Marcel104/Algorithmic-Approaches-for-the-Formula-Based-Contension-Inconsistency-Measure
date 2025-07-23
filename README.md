@@ -15,6 +15,10 @@ $I_{fc}$ now calculates the minimum of formulas, where at least one atom got ass
 
 $I_{fc}$ is formulawise satisfiability-oriented: each formula is checked individually whether it needs a both-valued atom to be satisfied. This leads to syntactic sensitivity as logically equivalent transformations can change the number of formulas and how they are affected by both-assignments.
 
+# Project Structure
+
+![Uploading Classdiagramm.png…]()
+
 # Experiment Orchestration
 
 The *main.py* script is the execution entry point and manages the entire experiment lifecycle. The process is initiated within the if *__name__ == "__main__"* clause.
