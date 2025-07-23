@@ -1,14 +1,16 @@
+# Introduction
+
 This project is based on the Master-Thesis 'Algorithmic Approaches for the Formula-Based Contension Inconsistency Measure' at the 'Fernuniversität in Hagen'.
+The agorithmic approaches, provided in this project, use Max SAT Solver and Answer Set Programming.
 
 # Formula-Based Contension Inconsistency Measure
 
 To calculate the formula-based contension inconsistency measure ($I_{fc}$) we use the three-valued logic by Graham Priest where we can assign each Atom a third truth-value 'both'.
-Ifc now calculates the minimum of formulas, where at least one atom got assigned the value 'both'. The agorithmic approaches, provided in this project, use Max SAT Solver and Answer Set Programming.
+$I_{fc}$ now calculates the minimum of formulas, where at least one atom got assigned the value 'both'.
 
 # Experiment Orchestration
 
-The *main.py* script is the execution entry point and manages the entire experiment
-lifecycle. The process is initiated within the if *__name__ == "__main__"* clause.
+The *main.py* script is the execution entry point and manages the entire experiment lifecycle. The process is initiated within the if *__name__ == "__main__"* clause.
 Initially, CSV log files are initialized with appropriate headers. Then, the *get_all_files()* function scans the data directory and compiles a list of all knowl-
 edge bases to be processed. In the main loop, each file is read in, and for each knowledgebase, the three solving functions *asp_encode_and_solve()*, *maxsat_encode_and_solve()*, and *maxsat_tseitin_encode_and_solve()* are called.
 
