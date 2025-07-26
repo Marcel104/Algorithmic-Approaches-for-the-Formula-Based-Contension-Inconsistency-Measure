@@ -3,12 +3,12 @@ from pysat.examples.rc2 import RC2
 import clingo
 import csv
 import os
-from time import time
+from time import perf_counter
 from multiprocessing import Process, Queue
 import sys
 
 sys.setrecursionlimit(2000)
-directory_path = "data\Test"
+directory_path = "data\SRS"
 log_file_general = "log.csv"
 log_file_maxsat = "log_MaxSAT.csv"
 TIMEOUT = 1000
@@ -64,7 +64,7 @@ def asp_encode_and_solve(kb_content):
     kb = parser.parse_kb_from_string(kb_content)
 
     from src.solver_ASP import ASPEncoder
-    start_time = time()
+    start_time = perf_counter()
     asp_encoder = ASPEncoder()
     program, encode_time = asp_encoder.encode(kb)
 
@@ -96,7 +96,7 @@ def asp_encode_and_solve(kb_content):
     ctl.configuration.solve.opt_mode = "opt"
     ctl.solve(on_model=on_model)
 
-    total_time = time() - start_time
+    total_time = perf_counter() - start_time
     f_inconsistent.sort()
     atom_values.sort(key=lambda x: x.split(":")[0])
     return optimal_cost, f_inconsistent, atom_values, total_time, encode_time
@@ -106,7 +106,7 @@ def maxsat_encode_and_solve(kb_content):
     kb = parser.parse_kb_from_string(kb_content)
 
     from src.solver_max_SAT_naive import MaxSatEncoder
-    start_time = time()
+    start_time = perf_counter()
     msat_encoder = MaxSatEncoder(kb)
     wcnf, encode_time = msat_encoder.encode()
 
@@ -132,7 +132,7 @@ def maxsat_encode_and_solve(kb_content):
             if not satisfied:
                 f_inconsistent.append(f"F{i}")
 
-    total_time = time() - start_time
+    total_time = perf_counter() - start_time
     f_inconsistent.sort()
     atom_values.sort(key=lambda x: x.split(":")[0])
 
@@ -143,7 +143,7 @@ def maxsat_tseitin_encode_and_solve(kb_content):
     kb = parser.parse_kb_from_string(kb_content)
 
     from src.solver_max_SAT_Tseitin import MaxSatEncoder
-    start_time = time()
+    start_time = perf_counter()
     msat_encoder = MaxSatEncoder(kb)
     wcnf, encode_time = msat_encoder.encode()
 
@@ -169,7 +169,7 @@ def maxsat_tseitin_encode_and_solve(kb_content):
             if not satisfied:
                 f_inconsistent.append(f"F{i}")
 
-    total_time = time() - start_time
+    total_time = perf_counter() - start_time
     f_inconsistent.sort()
     atom_values.sort(key=lambda x: x.split(":")[0])
 

@@ -1,13 +1,13 @@
 from pysat.formula import WCNF
 from pysat.formula import CNF, IDPool
 from src.formula import Formula, FormulaType, CnfTransformation
-from time import time
+from time import perf_counter
 
 
 class MaxSatEncoder:
 
     def __init__(self, kb):
-        self.start_time = time()
+        self.start_time = perf_counter()
         self.kb = kb
         self.cnf_formulas = kb.to_cnf()
         self.original_formulas = kb.formulas
@@ -104,7 +104,7 @@ class MaxSatEncoder:
 
         #print(wcnf.hard)
 
-        end_time = time()
+        end_time = perf_counter()
         elapsed_time = end_time - self.start_time
 
         return wcnf, elapsed_time

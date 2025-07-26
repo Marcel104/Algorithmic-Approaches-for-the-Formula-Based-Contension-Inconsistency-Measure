@@ -1,4 +1,4 @@
-from time import time
+from time import perf_counter
 from .formula import Formula, FormulaType
 
 TRUTH_VALUE_T = "t"
@@ -20,7 +20,7 @@ F_INCONSISTENT = "f_inconsistent"
 
 class ASPEncoder:
     def __init__(self):
-        self.start_time = time()
+        self.start_time = perf_counter()
 
     def add_truth_values(self):
         return f"tv({TRUTH_VALUE_T}).\ntv({TRUTH_VALUE_B}).\ntv({TRUTH_VALUE_F}).\n"
@@ -181,7 +181,7 @@ class ASPEncoder:
 
         #print(program)
 
-        end_time = time()
+        end_time = perf_counter()
         elapsed_time = end_time - self.start_time
 
         return program, elapsed_time
