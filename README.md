@@ -17,6 +17,8 @@ $I_{fc}$ is formulawise satisfiability-oriented: each formula is checked individ
 
 # Project Structure
 
+The central script, *main.py*, acts as the main controller. It iterates through knowledge bases in the file system, initiates solving runs for each approach, and manages logging. The scripts *parser.py*, *formula.py*, and *knowledge base.py* are responsible for reading and transforming the textual formulas into a structured, object-oriented representation. For each algorithmic approach, a dedicated encoder exists. Each encoder receives the object-oriented data model and translates it into the specific input format required by the corresponding solver. The resulting programs or formulas are passed to the respective solver libraries. Solver outputs are interpreted and standardized for consistent logging.
+
 <img width="522" height="772" alt="Blockdiagramm" src="https://github.com/user-attachments/assets/a056342a-a59f-49d5-91bd-3d05951d9a6a" />
 
 # Experiment Orchestration
