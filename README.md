@@ -25,6 +25,14 @@ The central script, *main.py*, acts as the main controller. It iterates through 
 
 
 The *main.py* script is the execution entry point and manages the entire experiment lifecycle. The process is initiated within the if *__name__ == "__main__"* clause.
+
+The following constants can be applied to change the directory path which contains the knowledge base files or to change the output log file name. The Timeout can be set in seconds.
+
+directory_path = "data"
+log_file_general = "log.csv"
+log_file_maxsat = "log_MaxSAT.csv"
+TIMEOUT = 1000
+
 Initially, CSV log files are initialized with appropriate headers. Then, the *get_all_files()* function scans the data directory and compiles a list of all knowl-
 edge bases to be processed. In the main loop, each file is read in, and for each knowledgebase, the three solving functions *asp_encode_and_solve()*, *maxsat_encode_and_solve()*, and *maxsat_tseitin_encode_and_solve()* are called.
 
